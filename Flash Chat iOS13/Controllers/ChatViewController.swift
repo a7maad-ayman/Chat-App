@@ -42,6 +42,8 @@ class ChatViewController: UIViewController {
                             self.messages.append(newMessage)
                             DispatchQueue.main.async {
                                 self.tableView.reloadData()
+                                let indexPath = IndexPath(row: self.messages.count-1, section: 0)
+                                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
                             }
                         }
                     }
@@ -56,7 +58,9 @@ class ChatViewController: UIViewController {
                 if let err = error {
                     print(err.localizedDescription)
                 }else{
-                    print("Success!")
+                    DispatchQueue.main.async {
+                        self.messageTextfield.text = ""
+                    }
                 }
             }
         }
@@ -80,8 +84,23 @@ extension ChatViewController : UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let message = messages[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier , for: indexPath) as! MessageTableViewCell
-        cell.messageBody.text = messages[indexPath.row].body
+        cell.messageBody.text = message.body
+        
+        if message.sender == Auth.auth().currentUser?.email {
+            cell.avtarImage.isHidden = false
+            cell.youAvatarImage.isHidden = true
+            cell.messageBackground.backgroundColor = UIColor(named: Constants.BrandColors.lightPurple)
+            cell.messageBody.textColor = UIColor(named: Constants.BrandColors.purple)
+        }else{
+            cell.avtarImage.isHidden = true
+            cell.youAvatarImage.isHidden = false
+            cell.messageBackground.backgroundColor = UIColor(named: Constants.BrandColors.purple)
+            cell.messageBody.textColor = UIColor(named: Constants.BrandColors.lightPurple)
+        }
+        
         return cell
     }
     
